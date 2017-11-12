@@ -38,6 +38,11 @@ public class Deck {
             }
         }
     }
+    
+    public Deck(long id) {
+    	this();
+    	this.id = id;	
+    }
 
 //    public  void shuffle() {
 //        ArrayList<String> temp = new ArrayList<String>();

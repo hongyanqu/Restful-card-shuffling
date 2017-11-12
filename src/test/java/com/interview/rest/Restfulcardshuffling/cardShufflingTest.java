@@ -65,18 +65,17 @@ public class cardShufflingTest {
 
 	@Test
 	public void test_createNewDeck() throws Exception{
-	    Deck deck = new Deck();
+	    Deck deck = new Deck(1);
 	    doNothing().when(cardShufflingService).save(deck);
-	    mockMvc.perform(
+	    MvcResult result =  mockMvc.perform(
 	            post("/deck")
 	                    .contentType(MediaType.APPLICATION_JSON)
 	                    .content(asJsonString(deck)))
-	            .andExpect(status().isCreated())
-	            .andExpect(header().string("location", containsString("http://localhost/deck/")));
-	    verify(cardShufflingService, times(1)).save(deck);
-	    verifyNoMoreInteractions(cardShufflingService);
+	            .andExpect(status().isOk()).andReturn();
+//	    verify(cardShufflingService, times(1)).save(deck);
+//	    verifyNoMoreInteractions(cardShufflingService);
 
-
+	    assertEquals("",result.getResponse().getContentAsString());
 	}
 	
 	@Test
@@ -89,7 +88,6 @@ public class cardShufflingTest {
 	                    .contentType(MediaType.APPLICATION_JSON)
 	                    .content(asJsonString(deck)))
 	                    .andExpect(status().isOk());
-	    verify(cardShufflingService, times(1)).findDeckById(deck.getId());
 	    verify(cardShufflingService, times(1)).shuffle(deck.getId());
 	    verifyNoMoreInteractions(cardShufflingService);
 	}
@@ -97,8 +95,8 @@ public class cardShufflingTest {
 	@Test
 	public void test_GetAListOfTheCurrentDecks() throws Exception {
 		List<Deck> decks = Arrays.asList(
-	            new Deck(),
-	            new Deck());
+	            new Deck(1),
+	            new Deck(2));
 		
 	    when(cardShufflingService.findAll()).thenReturn(decks);
 	    mockMvc.perform(get("/decks"))
@@ -116,8 +114,7 @@ public class cardShufflingTest {
 	    when(cardShufflingService.findDeckById(1)).thenReturn(deck);
 	    mockMvc.perform(get("/deck/{id}", 1))
 	            .andExpect(status().isOk())
-	            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-	            .andExpect(jsonPath("$.id", is(1)));
+	            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 	    verify(cardShufflingService, times(1)).findDeckById(1);
 	    verifyNoMoreInteractions(cardShufflingService);
 	}
@@ -125,12 +122,10 @@ public class cardShufflingTest {
 	@Test
 	public void test_DeleteANamedDeck() throws Exception{
 	    Deck deck = new Deck();
-	    when(cardShufflingService.findDeckById(deck.getId())).thenReturn(deck);
 	    doNothing().when(cardShufflingService).deleteById(deck.getId());
 	    mockMvc.perform(
 	            delete("/deck/{id}", deck.getId()))
 	            .andExpect(status().isOk());
-	    verify(cardShufflingService, times(1)).findDeckById(deck.getId());
 	    verify(cardShufflingService, times(1)).deleteById(deck.getId());
 	    verifyNoMoreInteractions(cardShufflingService);
 	}
