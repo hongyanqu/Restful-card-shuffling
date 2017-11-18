@@ -1,0 +1,1 @@
+insert into deck values(1, null, 'puke');

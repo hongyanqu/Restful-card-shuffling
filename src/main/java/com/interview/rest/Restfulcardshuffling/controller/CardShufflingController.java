@@ -1,17 +1,20 @@
 package com.interview.rest.Restfulcardshuffling.controller;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.ui.Model;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import com.interview.rest.Restfulcardshuffling.entity.Deck;
+import com.interview.rest.Restfulcardshuffling.exception.DeckNotFoundException;
 import com.interview.rest.Restfulcardshuffling.service.CardShufflingService;
 
 
@@ -22,30 +25,35 @@ public class CardShufflingController {
 	CardShufflingService cardShufflingService;
 	
 	
-	@RequestMapping(value = "/decks", method = RequestMethod.GET)
+	@GetMapping(value = "/decks")
 	public List<Deck> getAllDecks() {
 		
 		return cardShufflingService.findAll();
 	}
 	
-	@RequestMapping(value = "/deck/{id}", method = RequestMethod.GET)
-	public Deck getOneDeck(@PathVariable long id) {
+	@GetMapping(value = "/decks/{id}")
+	public Resource<Deck> getOneDeck(@PathVariable long id) {
+		Deck deck = cardShufflingService.findDeckById(id);
+		if(deck == null) throw new DeckNotFoundException("id" + id + ": is not existed.");
+		Resource<Deck> resource = new Resource<Deck>(deck);
+		ControllerLinkBuilder linkTo = linkTo(methodOn(this.getClass()).getAllDecks());
+		resource.add(linkTo.withRel("all-decks"));
 		
-		return cardShufflingService.findDeckById(id);
+		return resource;
 	}
 	
-	@RequestMapping(value = "/deck", method = RequestMethod.POST)
+	@PostMapping(value = "/decks")
 	public void saveDeck() {
 		Deck deck = new Deck();
 		cardShufflingService.save(deck);
 	}
 	
-	@RequestMapping(value = "/deck/shuffle/{id}", method = RequestMethod.POST)
+	@PostMapping(value = "/deck/shuffle/{id}")
 	public void shuffleDeck(@PathVariable long id) {
 		cardShufflingService.shuffle(id);
 	}
 	
-	@RequestMapping(value = "/deck/{id}", method = RequestMethod.DELETE)
+	@DeleteMapping(value = "/deck/{id}")
 	public void deleteDeck(@PathVariable long id) {
 		cardShufflingService.deleteById(id);
 	}
