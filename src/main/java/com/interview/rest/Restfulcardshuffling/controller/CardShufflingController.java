@@ -1,14 +1,17 @@
 package com.interview.rest.Restfulcardshuffling.controller;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -23,6 +26,9 @@ public class CardShufflingController {
 	
 	@Autowired
 	CardShufflingService cardShufflingService;
+	
+	@Autowired
+	private MessageSource messageSource;
 	
 	
 	@GetMapping(value = "/decks")
@@ -56,5 +62,10 @@ public class CardShufflingController {
 	@DeleteMapping(value = "/deck/{id}")
 	public void deleteDeck(@PathVariable long id) {
 		cardShufflingService.deleteById(id);
+	}
+	
+	@GetMapping(path="/deck-internationalized")
+	public String deckInternationalized(@RequestHeader(name = "Accept-Language", required = false) Locale locale){
+		return messageSource.getMessage("good.morning.message", null, locale);
 	}
 }
